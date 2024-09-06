@@ -122,7 +122,6 @@ const getMessages = async ({
 
 	const per_page = 100;
 	const pagesLeft = pages ?? Math.ceil(count / per_page);
-	console.log("pages left", pagesLeft);
 	if (pagesLeft <= 0) return [];
 
 	const messageData = await app.client.conversations.history({
@@ -168,7 +167,7 @@ const lastMessageIds: Record<string, string> = {};
  * and also DMs
  */
 app.event("message", async ({ event, context, client, say }) => {
-	console.log("event", event.type, event.subtype, event.channel);
+	console.log("[EVENT]", event.type, event.subtype, event.channel);
 
 	if (event.subtype === undefined) lastMessageIds[event.channel] = event.ts;
 
@@ -222,15 +221,13 @@ app.event("message", async ({ event, context, client, say }) => {
 	const messageInFreeGameChannel =
 		FREE_GAME_CHANNELS.includes(event.channel) && event.subtype === undefined;
 
-	console.log(messageHistory[event.channel]?.at(-1));
-
 	if (isDirectMessage || botWasPinged || messageInFreeGameChannel) {
 		// SAFETY: bail out if we're in an unknown channel
 		const known =
 			Object.values(CHANNEL_IDS).includes(event.channel) ||
 			event.channel_type === "im";
 		if (!known) {
-			console.log("not responding! unknown channel!");
+			console.log("[ACTION] not responding! unknown channel!");
 			return;
 		}
 
@@ -238,7 +235,7 @@ app.event("message", async ({ event, context, client, say }) => {
 		if ("user" in event && event.user === USER_IDS["Evil Robbie"]) return;
 		if ("bot_id" in event && event.bot_id) return;
 
-		console.log("generating...");
+		console.log("[ACTION] generating...");
 
 		const messages: CoreMessage[] = messageHistory[event.channel].map(
 			(message) => ({
@@ -292,7 +289,7 @@ app.event("message", async ({ event, context, client, say }) => {
 			}),
 		});
 
-		console.log(usage, object);
+		console.log("[ACTION] got message:", usage, object);
 		messageHistory[event.channel]?.at(-1)?.user;
 
 		const stillValid = lastMessageIds[event.channel] === event.ts;
@@ -314,14 +311,14 @@ app.event("message", async ({ event, context, client, say }) => {
 		return;
 	}
 
-	console.log("not responding");
+	console.log("[ACTION] not responding");
 	return;
 });
 
 // update once per minute
 while (true) {
 	await sleep(60_000);
-	console.log("git pulling!");
+	console.log("[GIT] pulling!");
 	await $`git fetch && git pull`;
-	console.log("git pulled!");
+	console.log("[GIT] pulled!");
 }
