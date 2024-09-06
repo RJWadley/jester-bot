@@ -321,7 +321,7 @@ app.event("message", async ({ event, context, client, say }) => {
 // update once per minute
 while (true) {
 	await sleep(60_000);
-	console.log("git pulling");
+	console.log("git pulling!");
 	await $`git fetch && git pull`;
-	console.log("git pulled");
+	console.log("git pulled!");
 }
