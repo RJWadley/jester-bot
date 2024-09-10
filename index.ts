@@ -165,12 +165,7 @@ const getMessages = async ({
 	return [...previousMessages, ...messages];
 };
 
-const messageHistory: Record<string, SlackMessage[]> = {
-	[CHANNEL_IDS.reformTeam]: await getMessages({
-		count: 1000,
-		channel: CHANNEL_IDS.reformTeam,
-	}),
-};
+const messageHistory: Record<string, SlackMessage[]> = {};
 const lastMessageIds: Record<string, string> = {};
 
 /**
@@ -186,7 +181,7 @@ app.event("message", async ({ event, context, client, say }) => {
 		// if we don't have any history, get it!
 		// if we do have history, find the message and add it to the history
 		messageHistory[event.channel] = await getMessages({
-			count: 1000,
+			count: 100,
 			channel: event.channel,
 		});
 	} else if (event.subtype !== "message_deleted") {
