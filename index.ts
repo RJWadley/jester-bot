@@ -134,6 +134,8 @@ const getMessages = async ({
 		cursor,
 	});
 
+	console.log("[SLACK] fetching messages", channel, cursor);
+
 	const messages = messageData.messages?.toReversed().map((message) => {
 		const userImages = message.files?.map((file) => file.thumb_1024) ?? [];
 		const botImages =
@@ -163,7 +165,12 @@ const getMessages = async ({
 	return [...previousMessages, ...messages];
 };
 
-const messageHistory: Record<string, SlackMessage[]> = {};
+const messageHistory: Record<string, SlackMessage[]> = {
+	[CHANNEL_IDS.reformTeam]: await getMessages({
+		count: 1000,
+		channel: CHANNEL_IDS.reformTeam,
+	}),
+};
 const lastMessageIds: Record<string, string> = {};
 
 /**
