@@ -36,7 +36,11 @@ const CHANNEL_IDS = {
 	testChannel: "C04S98U9PAQ",
 };
 
-const FREE_GAME_CHANNELS = [CHANNEL_IDS.testChannel];
+const FREE_GAME_CHANNELS = [
+	CHANNEL_IDS.testChannel,
+	CHANNEL_IDS.devs,
+	CHANNEL_IDS.reformTeam,
+];
 
 const USER_IDS = {
 	Eric: "U02KC6BS7",
