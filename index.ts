@@ -230,6 +230,7 @@ app.event("message", async ({ event, context, client, say }) => {
 			messageHistory[event.channel]?.filter((m) => m.ts !== messageId) ?? [];
 	}
 
+	const debug = true;
 	const isDirectMessage =
 		event.channel_type === "im" && event.subtype === undefined;
 	const botWasPinged =
@@ -237,7 +238,7 @@ app.event("message", async ({ event, context, client, say }) => {
 	const messageInFreeGameChannel =
 		FREE_GAME_CHANNELS.includes(event.channel) && event.subtype === undefined;
 
-	if (isDirectMessage || botWasPinged || messageInFreeGameChannel) {
+	if (debug || isDirectMessage || botWasPinged || messageInFreeGameChannel) {
 		// SAFETY: bail out if we're in an unknown channel
 		const known =
 			Object.values(CHANNEL_IDS).includes(event.channel) ||
@@ -310,17 +311,17 @@ app.event("message", async ({ event, context, client, say }) => {
 		const stillValid = lastMessageIds[event.channel] === event.ts;
 
 		if (object.shouldMessage && object.message && stillValid) {
-			const result = await say({
-				mrkdwn: true,
-				text: object.message,
-			});
+			// const result = await say({
+			// 	mrkdwn: true,
+			// 	text: object.message,
+			// });
 			// add the message to the history
-			messageHistory[event.channel]?.push({
-				user: USER_IDS["Evil Robbie"],
-				ts: result.ts,
-				text: object.message,
-				images: undefined,
-			});
+			// messageHistory[event.channel]?.push({
+			// 	user: USER_IDS["Evil Robbie"],
+			// 	ts: result.ts,
+			// 	text: object.message,
+			// 	images: undefined,
+			// });
 		}
 
 		return;
