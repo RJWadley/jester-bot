@@ -23,6 +23,6 @@
 		"noUnusedLocals": false,
 		"noUnusedParameters": false,
 		"noUncheckedIndexedAccess": true,
-		"noPropertyAccessFromIndexSignature": true
+		"noPropertyAccessFromIndexSignature": false
 	}
 }

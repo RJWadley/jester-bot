@@ -186,6 +186,8 @@ app.event("message", async ({ event, context, client, say }) => {
 			inclusive: true,
 		});
 		const [message] = history.messages?.toReversed() ?? [];
+		if (!message) return;
+
 		const newMessage = {
 			user: message.user,
 			ts: message.ts,
@@ -196,22 +198,25 @@ app.event("message", async ({ event, context, client, say }) => {
 		};
 		// if the message is already in the history, update it
 		// otherwise, add it
-		const existingMessageIndex = messageHistory[event.channel].findIndex(
+		messageHistory[event.channel] ||= [];
+		const channelHistory = messageHistory[event.channel];
+		if (!channelHistory) return;
+
+		const existingMessageIndex = channelHistory.findIndex(
 			(m) => m.ts === newMessage.ts,
 		);
 		if (existingMessageIndex === -1) {
-			messageHistory[event.channel].push(newMessage);
+			channelHistory.push(newMessage);
 		} else {
-			messageHistory[event.channel][existingMessageIndex] = newMessage;
+			channelHistory[existingMessageIndex] = newMessage;
 		}
 	}
 
 	// handle message deletions
 	if (event.subtype === "message_deleted") {
 		const messageId = event.deleted_ts;
-		messageHistory[event.channel] = messageHistory[event.channel].filter(
-			(m) => m.ts !== messageId,
-		);
+		messageHistory[event.channel] =
+			messageHistory[event.channel]?.filter((m) => m.ts !== messageId) ?? [];
 	}
 
 	const isDirectMessage =
@@ -237,8 +242,8 @@ app.event("message", async ({ event, context, client, say }) => {
 
 		console.log("[ACTION] generating...");
 
-		const messages: CoreMessage[] = messageHistory[event.channel].map(
-			(message) => ({
+		const messages: CoreMessage[] =
+			messageHistory[event.channel]?.map((message) => ({
 				role: "user",
 				content: [
 					message.text
@@ -263,8 +268,7 @@ app.event("message", async ({ event, context, client, say }) => {
 				]
 					.filter((x) => x !== null)
 					.flat(),
-			}),
-		);
+			})) ?? [];
 
 		messages.push({
 			role: "user",
@@ -300,7 +304,7 @@ app.event("message", async ({ event, context, client, say }) => {
 				text: object.message,
 			});
 			// add the message to the history
-			messageHistory[event.channel].push({
+			messageHistory[event.channel]?.push({
 				user: USER_IDS["Evil Robbie"],
 				ts: result.ts,
 				text: object.message,
