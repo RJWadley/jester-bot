@@ -51,7 +51,7 @@ const USER_IDS = {
 	David: "U01C6EY2MV1",
 	Dallen: "U01T3U9RQER",
 	Max: "U06TNMVL8QZ",
-	"Evil Robbie": "U042LLR0XJS",
+	"Evil Robbie (YOU)": "U042LLR0XJS",
 };
 
 const prompt = dedent`
@@ -244,7 +244,7 @@ app.event("message", async ({ event, context, client, say }) => {
 		}
 
 		// SAFETY: bail out if we're replying to a bot
-		if ("user" in event && event.user === USER_IDS["Evil Robbie"]) return;
+		if ("user" in event && event.user === USER_IDS["Evil Robbie (YOU)"]) return;
 		if ("bot_id" in event && event.bot_id) return;
 
 		console.log("[ACTION] generating...");
@@ -282,22 +282,35 @@ app.event("message", async ({ event, context, client, say }) => {
 			content: "you are evil robbie. generate a response, if desired.",
 		});
 
-		const { object, usage } = await generateObject({
+		const { object, usage } = await generateObject<
+			| {
+					message: string;
+			  }
+			| {
+					shouldMessage: boolean;
+					message?: string;
+			  }
+		>({
 			model,
 			temperature: 1.5,
 			messages,
 			system: prompt,
-			schema: z.object({
-				shouldMessage: z.boolean().describe(
-					dedent`
+			schema:
+				isDirectMessage || botWasPinged
+					? z.object({
+							message: z.string(),
+						})
+					: z.object({
+							shouldMessage: z.boolean().describe(
+								dedent`
 						do you want to message the team? 
 						careful not to message too much or too little!
 						after every message all the time is too much
 						fewer than once a week is too little
 					`,
-				),
-				message: z.string().optional(),
-			}),
+							),
+							message: z.string().optional(),
+						}),
 		});
 
 		console.log("[ACTION] got message:", usage, object);
@@ -305,14 +318,17 @@ app.event("message", async ({ event, context, client, say }) => {
 
 		const stillValid = lastMessageIds[event.channel] === event.ts;
 
-		if (object.shouldMessage && object.message && stillValid) {
+		const shouldMessage =
+			"shouldMessage" in object ? object.shouldMessage : true;
+
+		if (shouldMessage && object.message && stillValid) {
 			const result = await say({
 				mrkdwn: true,
 				text: object.message,
 			});
 			// add the message to the history
 			messageHistory[event.channel]?.push({
-				user: USER_IDS["Evil Robbie"],
+				user: USER_IDS["Evil Robbie (YOU)"],
 				ts: result.ts,
 				text: object.message,
 				images: undefined,
