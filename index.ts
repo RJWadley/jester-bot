@@ -194,7 +194,6 @@ const getMessages = async ({
 const messageHistory: Record<string, SlackMessage[]> = {};
 const lastMessageIds: Record<string, string> = {};
 
-
 app.event("message", async ({ event, context, client, say }) => {
 	console.log("[EVENT]", event.type, event.subtype, event.channel);
 
@@ -291,7 +290,7 @@ app.event("message", async ({ event, context, client, say }) => {
 								dedent`
 									do you want to message the team? 
 									careful not to message too much or too little!
-									after every message all the time is too much
+									more than once a day is too much
 									fewer than once a week is too little
 								`,
 							),
