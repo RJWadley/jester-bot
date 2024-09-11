@@ -101,7 +101,7 @@ type SlackMessage = {
 	user: string | undefined;
 	ts: string | undefined;
 	text: string | undefined;
-	images: string[] | undefined;
+	images: (string | ArrayBuffer)[] | undefined;
 };
 
 // recursively fetch messages, n at a time until we get the specified number of pages
@@ -137,25 +137,50 @@ const getMessages = async ({
 
 	console.log("[SLACK] fetching messages", channel, cursor);
 
-	const messages = messageData.messages?.toReversed().map((message) => {
-		const userImages = message.files?.map((file) => file.thumb_1024) ?? [];
-		const botImages =
-			message.blocks
-				?.filter((b) => b.type === "image")
-				.map((b) => b.image_url) ?? [];
+	const messagesRaw =
+		messageData.messages?.toReversed().map((message) => {
+			const userImages =
+				message.files?.flatMap((file) =>
+					// load file.thumb_1024 as an image
+					file.thumb_1024
+						? fetch(file.thumb_1024, {
+								headers: {
+									Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
+								},
+							}).then(async (res) => await res.arrayBuffer())
+						: [],
+				) ?? [];
+			const botImages =
+				message.blocks
+					?.filter((b) => b.type === "image")
+					.map((b) => b.image_url) ?? [];
 
-		const allImages = [...userImages, ...botImages].filter(
-			(image) => image !== undefined,
-		);
+			const allImages = [...userImages, ...botImages].filter(
+				(image) => image !== undefined,
+			);
 
-		return {
-			user: message.user,
-			ts: message.ts,
-			text: message.text,
-			images: allImages.length === 0 ? undefined : allImages,
-		};
-	});
-	if (!messages) return [];
+			return {
+				user: message.user,
+				ts: message.ts,
+				text: message.text,
+				images: allImages.length === 0 ? undefined : allImages,
+			};
+		}) ?? [];
+
+	// unwrap the image promises
+	const messages = await Promise.all(
+		messagesRaw.map(async (message) => {
+			if (message.images === undefined)
+				return { ...message, images: undefined };
+
+			const images = await Promise.all(message.images);
+
+			return {
+				...message,
+				images,
+			};
+		}),
+	);
 
 	const nextCursor = messageData.response_metadata?.next_cursor;
 
@@ -261,12 +286,7 @@ app.event("message", async ({ event, context, client, say }) => {
 								role: "user",
 								content: `[${
 									REVERSE_USER_IDS[message.user ?? ""] ?? message.user
-								} at ${formatTimestamp(message.ts)}${
-									// if we're in a DM, mention that
-									event.channel_type === "im"
-										? " (private message to evil robbie)"
-										: ""
-								}] ${message.text}`,
+								} at ${formatTimestamp(message.ts)}] ${message.text}`,
 							} satisfies CoreMessage)
 						: null,
 					message.images
@@ -277,7 +297,7 @@ app.event("message", async ({ event, context, client, say }) => {
 										content: [
 											{
 												type: "image",
-												image: new URL(i),
+												image: typeof i === "string" ? new URL(i) : i,
 											},
 										],
 									}) satisfies CoreMessage,
