@@ -34,12 +34,14 @@ const CHANNEL_IDS = {
 	devDesignReviews: "C040S2U1Y1X",
 	developmentReviews: "C0154EHBL3W",
 	testChannel: "C04S98U9PAQ",
+	memes: "C05TCK20DCH",
 };
 
 const FREE_GAME_CHANNELS = [
 	CHANNEL_IDS.testChannel,
 	CHANNEL_IDS.devs,
 	CHANNEL_IDS.reformTeam,
+	CHANNEL_IDS.memes,
 ];
 
 const USER_IDS = {
