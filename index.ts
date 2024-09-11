@@ -40,7 +40,7 @@ const CHANNEL_IDS = {
 const FREE_GAME_CHANNELS = [
 	CHANNEL_IDS.testChannel,
 	CHANNEL_IDS.devs,
-	CHANNEL_IDS.reformTeam,
+	// CHANNEL_IDS.reformTeam,
 	CHANNEL_IDS.memes,
 ];
 
