@@ -204,53 +204,11 @@ app.event("message", async ({ event, context, client, say }) => {
 	if (event.subtype === undefined || event.subtype === "file_share")
 		lastMessageIds[event.channel] = event.ts;
 
-	if (!messageHistory[event.channel]) {
-		// if we don't have any history, get it!
-		// if we do have history, find the message and add it to the history
-		messageHistory[event.channel] = await getMessages({
-			count: 100,
-			channel: event.channel,
-		});
-	} else if (event.subtype !== "message_deleted") {
-		const history = await client.conversations.history({
-			channel: event.channel,
-			latest: event.ts,
-			limit: 1,
-			inclusive: true,
-		});
-		const [message] = history.messages?.toReversed() ?? [];
-		if (!message) return;
-
-		const newMessage = {
-			user: message.user,
-			ts: message.ts,
-			text: message.text,
-			images: message.files
-				?.map((file) => file.thumb_1024)
-				.filter((image) => image !== undefined),
-		};
-		// if the message is already in the history, update it
-		// otherwise, add it
-		messageHistory[event.channel] ||= [];
-		const channelHistory = messageHistory[event.channel];
-		if (!channelHistory) return;
-
-		const existingMessageIndex = channelHistory.findIndex(
-			(m) => m.ts === newMessage.ts,
-		);
-		if (existingMessageIndex === -1) {
-			channelHistory.push(newMessage);
-		} else {
-			channelHistory[existingMessageIndex] = newMessage;
-		}
-	}
-
-	// handle message deletions
-	if (event.subtype === "message_deleted") {
-		const messageId = event.deleted_ts;
-		messageHistory[event.channel] =
-			messageHistory[event.channel]?.filter((m) => m.ts !== messageId) ?? [];
-	}
+	// update the message history
+	messageHistory[event.channel] = await getMessages({
+		count: 100,
+		channel: event.channel,
+	});
 
 	const isDirectMessage =
 		event.channel_type === "im" &&
