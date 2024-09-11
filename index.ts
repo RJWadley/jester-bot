@@ -194,13 +194,11 @@ const getMessages = async ({
 const messageHistory: Record<string, SlackMessage[]> = {};
 const lastMessageIds: Record<string, string> = {};
 
-/**
- * Respond to non-ping messages in safe channels when they include a hot word
- * and also DMs
- */
+
 app.event("message", async ({ event, context, client, say }) => {
 	console.log("[EVENT]", event.type, event.subtype, event.channel);
 
+	// new messages have no subtype, unless they include media
 	if (event.subtype === undefined || event.subtype === "file_share")
 		lastMessageIds[event.channel] = event.ts;
 
