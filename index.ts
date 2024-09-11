@@ -250,13 +250,12 @@ app.event("message", async ({ event, context, client, say }) => {
 		console.log("[ACTION] generating...");
 
 		const messages: CoreMessage[] =
-			messageHistory[event.channel]?.map((message) => ({
-				role: "user",
-				content: [
+			messageHistory[event.channel]
+				?.flatMap((message) => [
 					message.text
-						? {
-								type: "text" as const,
-								text: `[${
+						? ({
+								role: "user",
+								content: `[${
 									REVERSE_USER_IDS[message.user ?? ""] ?? message.user
 								} at ${formatTimestamp(message.ts)}${
 									// if we're in a DM, mention that
@@ -264,18 +263,25 @@ app.event("message", async ({ event, context, client, say }) => {
 										? " (private message to evil robbie)"
 										: ""
 								}] ${message.text}`,
-							}
+							} satisfies CoreMessage)
 						: null,
 					message.images
-						? message.images.map((image) => ({
-								type: "image" as const,
-								image: new URL(image),
-							}))
+						? message.images.map(
+								(i) =>
+									({
+										role: "user",
+										content: [
+											{
+												type: "image",
+												image: new URL(i),
+											},
+										],
+									}) satisfies CoreMessage,
+							)
 						: null,
-				]
-					.filter((x) => x !== null)
-					.flat(),
-			})) ?? [];
+				])
+				.flat()
+				.filter((x) => x !== null) ?? [];
 
 		messages.push({
 			role: "user",
@@ -303,11 +309,11 @@ app.event("message", async ({ event, context, client, say }) => {
 					: z.object({
 							shouldMessage: z.boolean().describe(
 								dedent`
-						do you want to message the team? 
-						careful not to message too much or too little!
-						after every message all the time is too much
-						fewer than once a week is too little
-					`,
+									do you want to message the team? 
+									careful not to message too much or too little!
+									after every message all the time is too much
+									fewer than once a week is too little
+								`,
 							),
 							message: z.string().optional(),
 						}),
