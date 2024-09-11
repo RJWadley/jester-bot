@@ -176,7 +176,8 @@ const lastMessageIds: Record<string, string> = {};
 app.event("message", async ({ event, context, client, say }) => {
 	console.log("[EVENT]", event.type, event.subtype, event.channel);
 
-	if (event.subtype === undefined) lastMessageIds[event.channel] = event.ts;
+	if (event.subtype === undefined || event.subtype === "file_share")
+		lastMessageIds[event.channel] = event.ts;
 
 	if (!messageHistory[event.channel]) {
 		// if we don't have any history, get it!
@@ -227,11 +228,14 @@ app.event("message", async ({ event, context, client, say }) => {
 	}
 
 	const isDirectMessage =
-		event.channel_type === "im" && event.subtype === undefined;
+		event.channel_type === "im" &&
+		(event.subtype === undefined || event.subtype === "file_share");
 	const botWasPinged =
-		event.subtype === undefined && event.text?.includes(BOT_PING);
+		(event.subtype === undefined || event.subtype === "file_share") &&
+		event.text?.includes(BOT_PING);
 	const messageInFreeGameChannel =
-		FREE_GAME_CHANNELS.includes(event.channel) && event.subtype === undefined;
+		FREE_GAME_CHANNELS.includes(event.channel) &&
+		(event.subtype === undefined || event.subtype === "file_share");
 
 	if (isDirectMessage || botWasPinged || messageInFreeGameChannel) {
 		// SAFETY: bail out if we're in an unknown channel
