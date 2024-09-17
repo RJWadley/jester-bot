@@ -342,7 +342,7 @@ app.event("message", async ({ event, context, client, say }) => {
 		if (shouldMessage && object.message && stillValid) {
 			const result = await say({
 				mrkdwn: true,
-				text: object.message,
+				text: addIdPings(object.message),
 			});
 			// add the message to the history
 			messageHistory[event.channel]?.push({
