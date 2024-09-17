@@ -288,6 +288,11 @@ app.event("message", async ({ event, context, client, say }) => {
 							message: z.string(),
 						})
 					: z.object({
+							shouldMessageLogic: z
+								.boolean()
+								.describe(
+									"explain why you do or dont want to message the team",
+								),
 							shouldMessage: z.boolean().describe(
 								dedent`
 									do you want to message the team? 
