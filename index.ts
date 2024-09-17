@@ -57,7 +57,7 @@ const USER_IDS = {
 	David: "U01C6EY2MV1",
 	Dallen: "U01T3U9RQER",
 	Max: "U06TNMVL8QZ",
-	"Evil Robbie (YOU)": "U042LLR0XJS",
+	EVIL_ROBBIE: "U042LLR0XJS",
 };
 
 const prompt = dedent`
@@ -71,13 +71,36 @@ const prompt = dedent`
 	designers: eric (lead), evan, brynn, alec
 	devs: robbie, david, dallen, max
 
-	You may format your response as mrkdwn or plain text. If you wish to mention a user, <@USER_ID> will work.
-	you can use emoji directly like 😀. you can also use custom emoji like :emoji_name:
-	Here are the current team's ids:
+	You may format your response as mrkdwn or plain text. If you wish to mention a user, <@name> will work:
 	${Object.entries(USER_IDS)
-		.map(([name, id]) => `- ${name}: <@${id}>`)
+		.map(([name]) => `- ${name}: <@${name}>`)
 		.join("\n")}
+	
+	you can use emoji directly like 😀. you can also use custom emoji like :emoji_name:
 `;
+
+/**
+ * replace numerical pings <@293jf98jsfd> with name pings <@kyle>
+ */
+const removeIdPings = (text: string | undefined) => {
+	if (!text) return text;
+	let out = text;
+	for (const [userName, userId] of Object.entries(USER_IDS)) {
+		out = out.replace(`<@${userId}>`, `<@${userName}>`);
+	}
+	return out;
+};
+
+/**
+ * replace name pings <@kyle> with numerical pings <@293jf98jsfd>
+ */
+const addIdPings = (text: string) => {
+	let out = text;
+	for (const [userName, userId] of Object.entries(USER_IDS)) {
+		out = out.replace(`<@${userName}>`, `<@${userId}>`);
+	}
+	return out;
+};
 
 const REVERSE_USER_IDS = Object.fromEntries(
 	Object.entries(USER_IDS).map(([key, value]) => [value, key]),
@@ -168,7 +191,7 @@ const getMessages = async ({
 			return {
 				user: message.user,
 				ts: message.ts,
-				text: message.text,
+				text: removeIdPings(message.text),
 				images: allImages.length === 0 ? undefined : allImages,
 			};
 		}) ?? [];
@@ -234,7 +257,7 @@ app.event("message", async ({ event, context, client, say }) => {
 		}
 
 		// SAFETY: bail out if we're replying to a bot
-		if ("user" in event && event.user === USER_IDS["Evil Robbie (YOU)"]) return;
+		if ("user" in event && event.user === USER_IDS.EVIL_ROBBIE) return;
 		if ("bot_id" in event && event.bot_id) return;
 
 		console.log("[ACTION] generating...");
@@ -322,9 +345,9 @@ app.event("message", async ({ event, context, client, say }) => {
 			});
 			// add the message to the history
 			messageHistory[event.channel]?.push({
-				user: USER_IDS["Evil Robbie (YOU)"],
+				user: USER_IDS.EVIL_ROBBIE,
 				ts: result.ts,
-				text: object.message,
+				text: addIdPings(object.message),
 				images: undefined,
 			});
 		}
