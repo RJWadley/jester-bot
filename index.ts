@@ -288,7 +288,7 @@ app.event("message", async ({ event, context, client, say }) => {
 							message: z.string(),
 						})
 					: z.object({
-							shouldMessageExplanation: z.boolean().describe(
+							shouldMessageExplanation: z.string().describe(
 								dedent`
 									careful not to message too much or too little!
 									more than once a day is too much,
