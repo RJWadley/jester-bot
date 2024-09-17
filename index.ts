@@ -72,7 +72,7 @@ const prompt = dedent`
 	devs: robbie, david, dallen, max
 
 	You may format your response as mrkdwn or plain text. If you wish to mention a user, <@USER_ID> will work.
-	you can use emoji directly like 😀. don't use emoji shortcodes like :emoji_name: as they will come through as plain text
+	you can use emoji directly like 😀. you can also use custom emoji like :emoji_name:
 	Here are the current team's ids:
 	${Object.entries(USER_IDS)
 		.map(([name, id]) => `- ${name}: <@${id}>`)
