@@ -4,8 +4,9 @@ import { google } from "@ai-sdk/google";
 import dedent from "dedent";
 import { z } from "zod";
 import { $, sleep } from "bun";
+import { openai } from "@ai-sdk/openai";
 
-const model = google("gemini-1.5-flash", {
+const googleModel = google("gemini-1.5-flash", {
 	safetySettings: [
 		{
 			category: "HARM_CATEGORY_DANGEROUS_CONTENT",
@@ -25,6 +26,9 @@ const model = google("gemini-1.5-flash", {
 		},
 	],
 });
+
+const openaiModel = openai("gpt-4o-mini");
+const model = openaiModel;
 
 const CHANNEL_IDS = {
 	reformTeam: "C08ECMHAR",
