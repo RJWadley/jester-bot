@@ -288,17 +288,16 @@ app.event("message", async ({ event, context, client, say }) => {
 							message: z.string(),
 						})
 					: z.object({
-							shouldMessageLogic: z
-								.boolean()
-								.describe(
-									"explain why you do or dont want to message the team",
-								),
+							shouldMessageLogic: z.boolean().describe(
+								dedent`
+									careful not to message too much or too little!
+									more than once a day is too much,
+									fewer than once a week is too little.
+									explain why you do or dont want to message the team`,
+							),
 							shouldMessage: z.boolean().describe(
 								dedent`
-									do you want to message the team? 
-									careful not to message too much or too little!
-									more than once a day is too much
-									fewer than once a week is too little
+									do you want to message the team?
 								`,
 							),
 							message: z.string().optional(),
