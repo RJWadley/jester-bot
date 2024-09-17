@@ -98,7 +98,7 @@ const addIdPings = (text: string) => {
 	let out = text;
 	for (const [userName, userId] of Object.entries(USER_IDS)) {
 		out = out.replaceAll(`<@${userName}>`, `<@${userId}>`);
-		out = out.replaceAll(`@${userName}`, `@<${userId}>`);
+		out = out.replaceAll(`@${userName}`, `<@${userId}>`);
 	}
 	return out;
 };
