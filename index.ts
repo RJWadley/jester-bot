@@ -283,7 +283,6 @@ app.event("message", async ({ event, context, client, say }) => {
 			  }
 		>({
 			model,
-			temperature: 1.5,
 			messages,
 			system: prompt,
 			schema:
