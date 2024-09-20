@@ -283,6 +283,12 @@ app.event("message", async ({ event, context, client, say }) => {
 										role: "user",
 										content: [
 											{
+												type: "text",
+												text: `[${
+													REVERSE_USER_IDS[message.user ?? ""] ?? message.user
+												} at ${formatTimestamp(message.ts)}] ${message.text}`,
+											},
+											{
 												type: "image",
 												image: typeof i === "string" ? new URL(i) : i,
 											},
