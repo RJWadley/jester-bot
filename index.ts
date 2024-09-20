@@ -296,7 +296,8 @@ app.event("message", async ({ event, context, client, say }) => {
 
 		messages.push({
 			role: "user",
-			content: "you are evil robbie. generate a response, if desired.",
+			content:
+				"[error] message did not contain a swear word. please try again.",
 		});
 
 		const { object, usage } = await generateObject<
