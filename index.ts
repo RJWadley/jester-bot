@@ -321,13 +321,13 @@ app.event("message", async ({ event, context, client, say }) => {
 							shouldMessageExplanation: z.string().describe(
 								dedent`
 									careful not to message too much or too little!
-									more than once a day is too much,
-									fewer than once a week is too little.
-									explain why you do or dont want to message the team`,
+									more than once message a day is too much,
+									fewer than once message a week is too little.
+									justify why you do or dont want to send a message`,
 							),
 							shouldMessage: z.boolean().describe(
 								dedent`
-									do you want to message the team?
+									do you want to message?
 								`,
 							),
 							message: z.string().optional(),
