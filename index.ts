@@ -105,6 +105,12 @@ const addIdPings = (text: string) => {
 	return out;
 };
 
+const getNameFromId = (id: string | undefined) => {
+	if (!id) return "unknown";
+	if (id === USER_IDS.EVIL_ROBBIE) return "YOU";
+	return REVERSE_USER_IDS[id] ?? id;
+};
+
 const REVERSE_USER_IDS = Object.fromEntries(
 	Object.entries(USER_IDS).map(([key, value]) => [value, key]),
 );
@@ -270,10 +276,11 @@ app.event("message", async ({ event, context, client, say }) => {
 				?.flatMap((message) => [
 					message.text
 						? ({
-								role: "user",
-								content: `[${
-									REVERSE_USER_IDS[message.user ?? ""] ?? message.user
-								} at ${formatTimestamp(message.ts)}] ${message.text}`,
+								role:
+									message.user === USER_IDS.EVIL_ROBBIE ? "assistant" : "user",
+								content: `[${getNameFromId(
+									message.user,
+								)} at ${formatTimestamp(message.ts)}] ${message.text}`,
 							} satisfies CoreMessage)
 						: null,
 					message.images
@@ -284,9 +291,9 @@ app.event("message", async ({ event, context, client, say }) => {
 										content: [
 											{
 												type: "text",
-												text: `[${
-													REVERSE_USER_IDS[message.user ?? ""] ?? message.user
-												} at ${formatTimestamp(message.ts)}] ${message.text}`,
+												text: `[${getNameFromId(
+													message.user,
+												)} at ${formatTimestamp(message.ts)}] ${message.text}`,
 											},
 											{
 												type: "image",
