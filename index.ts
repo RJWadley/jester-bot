@@ -325,7 +325,7 @@ app.event("message", async ({ event, context, client, say }) => {
 			model,
 			messages,
 			system: prompt,
-			temperature: 2,
+			temperature: 1.5,
 			schema:
 				isDirectMessage || botWasPinged
 					? z.object({
