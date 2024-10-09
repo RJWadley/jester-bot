@@ -27,7 +27,7 @@ const googleModel = google("gemini-1.5-flash", {
 	],
 });
 
-const openaiModel = openai("gpt-4o-mini");
+const openaiModel = openai("gpt-4o");
 const model = openaiModel;
 
 const CHANNEL_IDS = {
