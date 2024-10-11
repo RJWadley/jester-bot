@@ -307,12 +307,6 @@ app.event("message", async ({ event, context, client, say }) => {
 				.flat()
 				.filter((x) => x !== null) ?? [];
 
-		messages.push({
-			role: "user",
-			content:
-				"[error] message did not contain a swear word. please try again.",
-		});
-
 		const { object, usage } = await generateObject<
 			| {
 					message: string;
