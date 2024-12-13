@@ -6,7 +6,7 @@ import { z } from "zod";
 import { $, sleep } from "bun";
 import { openai } from "@ai-sdk/openai";
 
-const googleModel = google("gemini-1.5-flash", {
+const googleModel = google("gemini-2.0-flash-exp", {
 	safetySettings: [
 		{
 			category: "HARM_CATEGORY_DANGEROUS_CONTENT",
@@ -28,7 +28,7 @@ const googleModel = google("gemini-1.5-flash", {
 });
 
 const openaiModel = openai("gpt-4o-mini");
-const model = openaiModel;
+const model = googleModel;
 
 const CHANNEL_IDS = {
 	reformTeam: "C08ECMHAR",
