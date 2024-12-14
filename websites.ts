@@ -24,7 +24,16 @@ export async function viewWebsite(url: string): Promise<ArrayBuffer | null> {
 				await page.goto(url, { waitUntil: "domcontentloaded" });
 				await sleep(5000);
 
-				const result = await (await page.screenshot()).buffer;
+				await page.evaluate(() => {
+					// close the instagram sign in popup
+					if (window.location.hostname === "www.instagram.com") {
+						document
+							.querySelector("svg[aria-label=Close]")
+							?.parentElement?.click();
+					}
+				});
+
+				const result = (await page.screenshot()).buffer;
 
 				console.log("screenshot taken of", await page.title());
 
@@ -41,3 +50,7 @@ export async function viewWebsite(url: string): Promise<ArrayBuffer | null> {
 	cache.set(url, fetcher);
 	return await fetcher;
 }
+
+viewWebsite(
+	"https://www.instagram.com/reel/C-bT0JaSjTp/?igsh=MXJxNGRna3lvMTZwaQ%3D%3D",
+);
