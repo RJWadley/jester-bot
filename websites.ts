@@ -50,7 +50,3 @@ export async function viewWebsite(url: string): Promise<ArrayBuffer | null> {
 	cache.set(url, fetcher);
 	return await fetcher;
 }
-
-viewWebsite(
-	"https://www.instagram.com/reel/C-bT0JaSjTp/?igsh=MXJxNGRna3lvMTZwaQ%3D%3D",
-);
