@@ -1,10 +1,12 @@
 import { App } from "@slack/bolt";
-import { generateObject, type CoreMessage } from "ai";
+import { generateText, type CoreMessage } from "ai";
 import { google } from "@ai-sdk/google";
 import dedent from "dedent";
-import { z } from "zod";
 import { $, sleep } from "bun";
 import { openai } from "@ai-sdk/openai";
+import { viewWebsite } from "./websites";
+
+const DEFAULT_MESSAGE_COUNT = 10;
 
 const googleModel = google("gemini-2.0-flash-exp", {
 	safetySettings: [
@@ -70,7 +72,7 @@ const prompt = dedent`
 	in your response or it will not be sent.
 
 	# the team
-	designers: eric (lead), evan (about to quit), brynn, alec (also a project manager)
+	designers: eric (lead), brynn, alec (also a project manager)
 	devs: robbie, david (lead), dallen, max (intern)
 
 	You may format your response as mrkdwn or plain text. If you wish to mention a user, <@name> will work:
@@ -79,6 +81,10 @@ const prompt = dedent`
 		.join("\n")}
 	
 	you can use emoji directly like 😀. you can also use custom emoji like :emoji_name:
+
+	keep things new and fun. try not to repeat words or phrases.
+
+	you may also choose not to respond by saying 'pass'
 `;
 
 /**
@@ -139,7 +145,7 @@ type SlackMessage = {
 	user: string | undefined;
 	ts: string | undefined;
 	text: string | undefined;
-	images: (string | ArrayBuffer)[] | undefined;
+	images: (string | ArrayBuffer | null)[] | undefined;
 };
 
 // recursively fetch messages, n at a time until we get the specified number of pages
@@ -163,7 +169,7 @@ const getMessages = async ({
 )): Promise<SlackMessage[]> => {
 	if (count && pages) throw new Error("Cannot specify both count and pages");
 
-	const per_page = 100;
+	const per_page = Math.min(100, DEFAULT_MESSAGE_COUNT);
 	const pagesLeft = pages ?? Math.ceil(count / per_page);
 	if (pagesLeft <= 0) return [];
 
@@ -173,7 +179,7 @@ const getMessages = async ({
 		cursor,
 	});
 
-	console.log("[SLACK] fetching messages", channel, cursor);
+	console.log("fetching slack messages", channel, cursor);
 
 	const messagesRaw =
 		messageData.messages?.toReversed().map((message) => {
@@ -192,10 +198,19 @@ const getMessages = async ({
 				message.blocks
 					?.filter((b) => b.type === "image")
 					.map((b) => b.image_url) ?? [];
+			const linksRegex =
+				/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+			const allMessageLinks = message.text?.match(linksRegex);
 
-			const allImages = [...userImages, ...botImages].filter(
-				(image) => image !== undefined,
-			);
+			const websitePreviews = allMessageLinks
+				? allMessageLinks.map((link) => viewWebsite(link))
+				: [];
+
+			const allImages = [
+				...userImages,
+				...botImages,
+				...websitePreviews,
+			].filter((image) => image !== undefined);
 
 			return {
 				user: message.user,
@@ -233,7 +248,7 @@ const messageHistory: Record<string, SlackMessage[]> = {};
 const lastMessageIds: Record<string, string> = {};
 
 app.event("message", async ({ event, context, client, say }) => {
-	console.log("[EVENT]", event.type, event.subtype, event.channel);
+	console.log("new event:", event.type, event.subtype, event.channel);
 
 	// new messages have no subtype, unless they include media
 	if (event.subtype === undefined || event.subtype === "file_share")
@@ -241,7 +256,7 @@ app.event("message", async ({ event, context, client, say }) => {
 
 	// update the message history
 	messageHistory[event.channel] = await getMessages({
-		count: 100,
+		count: DEFAULT_MESSAGE_COUNT,
 		channel: event.channel,
 	});
 
@@ -261,7 +276,7 @@ app.event("message", async ({ event, context, client, say }) => {
 			Object.values(CHANNEL_IDS).includes(event.channel) ||
 			event.channel_type === "im";
 		if (!known) {
-			console.log("[ACTION] not responding! unknown channel!");
+			console.log("skipping due to unknown channel");
 			return;
 		}
 
@@ -269,7 +284,7 @@ app.event("message", async ({ event, context, client, say }) => {
 		if ("user" in event && event.user === USER_IDS.EVIL_ROBBIE) return;
 		if ("bot_id" in event && event.bot_id) return;
 
-		console.log("[ACTION] generating...");
+		console.log("generating a response...");
 
 		const messages: CoreMessage[] =
 			messageHistory[event.channel]
@@ -284,82 +299,60 @@ app.event("message", async ({ event, context, client, say }) => {
 							} satisfies CoreMessage)
 						: null,
 					message.images
-						? message.images.map(
-								(i) =>
-									({
-										role: "user",
-										content: [
-											{
-												type: "text",
-												text: `[${getNameFromId(
-													message.user,
-												)} at ${formatTimestamp(message.ts)}] ${message.text}`,
-											},
-											{
-												type: "image",
-												image: typeof i === "string" ? new URL(i) : i,
-											},
-										],
-									}) satisfies CoreMessage,
-							)
+						? message.images
+								.filter((i) => i !== null)
+								.map(
+									(i) =>
+										({
+											role: "user",
+											content: [
+												{
+													type: "text",
+													text: `[${getNameFromId(
+														message.user,
+													)} at ${formatTimestamp(message.ts)}] ${message.text}`,
+												},
+												{
+													type: "image",
+													image: typeof i === "string" ? new URL(i) : i,
+												},
+											],
+										}) satisfies CoreMessage,
+								)
 						: null,
 				])
 				.flat()
 				.filter((x) => x !== null) ?? [];
 
-		const { object, usage } = await generateObject<
-			| {
-					message: string;
-			  }
-			| {
-					shouldMessage: boolean;
-					message?: string;
-			  }
-		>({
+		const { text: modelOutput } = await generateText({
 			model,
 			messages,
 			system: prompt,
-			temperature: 1.3,
-			schema:
-				isDirectMessage || botWasPinged
-					? z.object({
-							message: z.string(),
-						})
-					: z.object({
-							shouldMessageExplanation: z.string().describe(
-								dedent`
-									careful not to message too much or too little!
-									more than once message a day is too much,
-									fewer than once message a week is too little.
-									justify why you do or dont want to send a message`,
-							),
-							shouldMessage: z.boolean().describe(
-								dedent`
-									do you want to message?
-								`,
-							),
-							message: z.string().optional(),
-						}),
+			maxSteps: 5,
 		});
 
-		console.log("[ACTION] got message:", usage, object);
-		messageHistory[event.channel]?.at(-1)?.user;
+		const message = modelOutput
+			.trim()
+			.replaceAll(/^\[.*?\]/g, "")
+			.trim();
+
+		console.log("LLM response:", message);
+
+		const shouldMessage =
+			message.toLowerCase().replaceAll(/[^a-zA-Z0-9\s]/g, "") !== "pass";
 
 		const stillValid = lastMessageIds[event.channel] === event.ts;
 
-		const shouldMessage =
-			"shouldMessage" in object ? object.shouldMessage : true;
-
-		if (shouldMessage && object.message && stillValid) {
+		if (shouldMessage && message && stillValid) {
 			const result = await say({
 				mrkdwn: true,
-				text: addIdPings(object.message),
+				text: addIdPings(message),
 			});
 			// add the message to the history
 			messageHistory[event.channel]?.push({
 				user: USER_IDS.EVIL_ROBBIE,
 				ts: result.ts,
-				text: addIdPings(object.message),
+				text: addIdPings(message),
 				images: undefined,
 			});
 		}
@@ -367,7 +360,14 @@ app.event("message", async ({ event, context, client, say }) => {
 		return;
 	}
 
-	console.log("[ACTION] not responding");
+	console.log(
+		"did not respond:",
+		isDirectMessage ? "direct message" : "not direct message",
+		", ",
+		botWasPinged ? "bot pinged" : "not bot pinged",
+		", ",
+		messageInFreeGameChannel ? "free game channel" : "not free game channel",
+	);
 	return;
 });
 
