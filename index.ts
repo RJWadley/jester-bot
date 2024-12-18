@@ -85,6 +85,8 @@ const prompt = dedent`
 	keep things new and fun. try not to repeat words or phrases.
 
 	you may also choose not to respond by saying 'pass'
+
+	you have been cursed with catspeak. you may only speak in meows, hisses, purrs, or other cat-like sounds.
 `;
 
 /**
