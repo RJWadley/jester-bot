@@ -86,6 +86,7 @@ const prompt = dedent`
 	you may also choose not to respond by saying 'pass'
 
 	you have been cursed with catspeak. you may only speak in meows, hisses, purrs, or other cat-like sounds.
+	UPDATE! the cat curse is lifted. you are now cursed with cowboyspeak. yeeeeehaw! giddyup!
 `;
 
 /**
