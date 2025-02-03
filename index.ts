@@ -327,7 +327,7 @@ app.event("message", async ({ event, context, client, say }) => {
 				.flat()
 				.filter((x) => x !== null) ?? [];
 
-		const { text: modelOutput } = await generateText({
+		const { text: modelOutput, reasoning } = await generateText({
 			model,
 			messages,
 			system: prompt,
@@ -339,7 +339,8 @@ app.event("message", async ({ event, context, client, say }) => {
 			.replaceAll(/^\[.*?\]/g, "")
 			.trim();
 
-		console.log("LLM response:", message);
+		console.log("LLM reasoning:", reasoning||'no reasoning');
+		console.log("LLM response:", message||'no message');
 
 		const shouldMessage =
 			message.toLowerCase().replaceAll(/[^a-zA-Z0-9\s]/g, "") !== "pass";
