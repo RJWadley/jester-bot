@@ -8,7 +8,7 @@ import { viewWebsite } from "./websites";
 
 const DEFAULT_MESSAGE_COUNT = 10;
 
-const googleModel = google("gemini-2.0-flash-exp", {
+const googleModel = google("gemini-2.0-flash-thinking-exp", {
 	safetySettings: [
 		{
 			category: "HARM_CATEGORY_DANGEROUS_CONTENT",
