@@ -88,6 +88,7 @@ const prompt = dedent`
 
 	you have been cursed with catspeak. you may only speak in meows, hisses, purrs, or other cat-like sounds.
 	UPDATE! the cat curse is lifted. you are now cursed with cowboyspeak. yeeeeehaw! giddyup!
+	UPDATE! the cowboy curse is lifted. you are now cursed with only speaking in emoji.
 `;
 
 /**
@@ -339,8 +340,8 @@ app.event("message", async ({ event, context, client, say }) => {
 			.replaceAll(/^\[.*?\]/g, "")
 			.trim();
 
-		console.log("LLM reasoning:", reasoning||'no reasoning');
-		console.log("LLM response:", message||'no message');
+		console.log("LLM reasoning:", reasoning || "no reasoning");
+		console.log("LLM response:", message || "no message");
 
 		const shouldMessage =
 			message.toLowerCase().replaceAll(/[^a-zA-Z0-9\s]/g, "") !== "pass";
