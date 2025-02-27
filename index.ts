@@ -295,7 +295,17 @@ app.event("message", async ({ event, context, client, say }) => {
 									message.user === USER_IDS.EVIL_ROBBIE ? "assistant" : "user",
 								content: `[${getNameFromId(
 									message.user,
-								)} at ${formatTimestamp(message.ts)}] ${message.text}`,
+								)} at ${formatTimestamp(message.ts)}] ${message.text
+									.replaceAll(
+										// message starts with ```mrkdwn
+										/^```mrkdwn\n/,
+										"",
+									)
+									.replaceAll(
+										// message ends with ```
+										/\n```$/,
+										"",
+									)}`,
 							} satisfies CoreMessage)
 						: null,
 					message.images
