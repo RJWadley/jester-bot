@@ -75,7 +75,7 @@ const prompt = dedent`
 	devs: robbie, david (lead), max (former intern)
 	former employees: evan (former designer, resigned), dallen (former dev, let go)
 
-	You may format your response as mrkdwn or plain text. If you wish to mention a user, <@name> will work:
+	Format your response as plain text. If you wish to mention a user, <@name> will work:
 	${Object.entries(USER_IDS)
 		.map(([name]) => `- ${name}: <@${name}>`)
 		.join("\n")}
