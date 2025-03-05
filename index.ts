@@ -343,14 +343,14 @@ app.event("message", async ({ event, context, client, say }) => {
 
 		const message = modelOutput
 			.trim()
-			.replaceAll(/^\[.*?\]/g, "")
+			.replaceAll(/^\[.*?\]/, "")
 			.trim();
 
 		console.log("LLM reasoning:", reasoning || "no reasoning");
 		console.log("LLM response:", message || "no message");
 
 		const shouldMessage =
-			message.toLowerCase().replaceAll(/[^a-zA-Z0-9\s]/g, "") !== "pass";
+			message.toLowerCase().replaceAll(/[^a-zA-Z0-9\s]/, "") !== "pass";
 
 		const stillValid = lastMessageIds[event.channel] === event.ts;
 
