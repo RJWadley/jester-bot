@@ -29,8 +29,8 @@ const googleModel = google("gemini-2.0-flash-thinking-exp", {
 	],
 });
 
-const openaiModel = openai("gpt-4o-mini");
-const model = googleModel;
+const openaiModel = openai("gpt-4.5-preview");
+const model = openaiModel;
 
 const CHANNEL_IDS = {
 	reformTeam: "C08ECMHAR",

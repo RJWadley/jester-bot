@@ -12,10 +12,10 @@
 		"typescript": "^5.5.4"
 	},
 	"dependencies": {
-		"@ai-sdk/google": "^1.1.11",
-		"@ai-sdk/openai": "^1.1.9",
-		"@slack/bolt": "^4.2.0",
-		"ai": "^4.1.35",
+		"@ai-sdk/google": "^1.1.20",
+		"@ai-sdk/openai": "^1.2.1",
+		"@slack/bolt": "^4.2.1",
+		"ai": "^4.1.53",
 		"dedent": "^1.5.3",
 		"puppeteer-extra": "^3.3.6",
 		"puppeteer-extra-plugin-adblocker": "^2.13.6",
