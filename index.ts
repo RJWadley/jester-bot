@@ -30,7 +30,24 @@ const googleModel = google("gemini-2.0-flash-thinking-exp", {
 });
 
 const openaiModel = openai("gpt-4.5-preview");
-const model = openaiModel;
+
+const doubleGenerate = (
+	options: Omit<Parameters<typeof generateText>[0], "model">,
+) => {
+	try {
+		return generateText({ ...options, model: openaiModel });
+	} catch (e) {
+		try {
+			return generateText({ ...options, model: googleModel });
+		} catch (e) {
+			console.error("failed to generate text", e);
+			return {
+				text: "your message was so dumb, i crashed twice while trying to respond",
+				reasoning: "",
+			};
+		}
+	}
+};
 
 const CHANNEL_IDS = {
 	reformTeam: "C08ECMHAR",
@@ -334,8 +351,7 @@ app.event("message", async ({ event, context, client, say }) => {
 				.flat()
 				.filter((x) => x !== null) ?? [];
 
-		const { text: modelOutput, reasoning } = await generateText({
-			model,
+		const { text: modelOutput, reasoning } = await doubleGenerate({
 			messages,
 			system: prompt,
 			maxSteps: 5,
