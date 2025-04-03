@@ -368,7 +368,8 @@ app.event("message", async ({ event, context, client, say }) => {
 		const shouldMessage =
 			message.toLowerCase().replaceAll(/[^a-zA-Z0-9\s]/g, "") !== "pass";
 
-		const stillValid = lastMessageIds[event.channel] === event.ts;
+		const stillValid =
+			lastMessageIds[event.channel] === event.ts || botWasPinged;
 
 		if (shouldMessage && message && stillValid) {
 			const result = await say({
