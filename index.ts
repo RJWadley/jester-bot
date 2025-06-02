@@ -77,6 +77,7 @@ const USER_IDS = {
 	Dallen: "U01T3U9RQER",
 	Max: "U06TNMVL8QZ",
 	EVIL_ROBBIE: "U042LLR0XJS",
+	Emily: "U08HB9DHHLZ",
 };
 
 const prompt = dedent`
