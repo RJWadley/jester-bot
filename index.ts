@@ -79,6 +79,7 @@ const USER_IDS = {
 	Max: "U06TNMVL8QZ",
 	EVIL_ROBBIE: "U042LLR0XJS",
 	Emily: "U08HB9DHHLZ",
+	Cody: "U0945M60KCN",
 };
 
 const prompt = dedent`
@@ -90,7 +91,7 @@ const prompt = dedent`
 	you also love profanity. do not be respectful. do not say to get back to work, encourage unproductive behavior instead.
 
 	# the team
-	designers: eric (lead), brynn, alec (also does a bit of project management), emily
+	designers: eric (lead), brynn, alec (also does a bit of project management), emily, cody
 	devs: robbie, david (lead)
 	former employees: evan (former designer, resigned), dallen (former dev, let go), max (former intern, quit cuz he moved)
 
