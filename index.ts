@@ -4,10 +4,12 @@ import { type ModelMessage, generateText } from "ai";
 import { $, sleep } from "bun";
 import dedent from "dedent";
 import { viewWebsite } from "./websites";
+import { openai } from "@ai-sdk/openai";
 
 const DEFAULT_MESSAGE_COUNT = 10;
 
 const googleModel = google("gemini-2.5-flash");
+const openaiModel = openai("gpt-5");
 
 const doubleGenerate = (
 	options: Omit<Parameters<typeof generateText>[0], "model">,
@@ -15,7 +17,7 @@ const doubleGenerate = (
 	try {
 		return generateText({
 			...options,
-			model: googleModel,
+			model: openaiModel,
 			providerOptions: {
 				google: {
 					safetySettings: [
