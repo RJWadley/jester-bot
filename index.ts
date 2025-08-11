@@ -128,6 +128,27 @@ const addIdPings = (text: string) => {
 	return out;
 };
 
+/**
+ * replace \u{...} style unicode escapes with actual characters
+ * example: \u{1f602} -> 😂
+ */
+const replaceUnicodeEscapes = (text: string): string =>
+	text.replace(/\\u\{([0-9a-fA-F]+)\}/g, (match, hex) => {
+		const codePoint = Number.parseInt(hex, 16);
+		if (Number.isNaN(codePoint)) return match;
+		try {
+			return String.fromCodePoint(codePoint);
+		} catch {
+			return match;
+		}
+	});
+
+/**
+ * prepare text for slack by converting name pings and decoding unicode escapes
+ */
+const prepareOutgoingText = (text: string): string =>
+	addIdPings(replaceUnicodeEscapes(text));
+
 const getNameFromId = (id: string | undefined) => {
 	if (!id) return "unknown";
 	if (id === USER_IDS.EVIL_ROBBIE) return "YOU";
@@ -371,15 +392,16 @@ app.event("message", async ({ event, context, client, say }) => {
 			lastMessageIds[event.channel] === event.ts || botWasPinged;
 
 		if (shouldMessage && message && stillValid) {
+			const outgoingText = prepareOutgoingText(message);
 			const result = await say({
 				mrkdwn: true,
-				text: addIdPings(message),
+				text: outgoingText,
 			});
 			// add the message to the history
 			messageHistory[event.channel]?.push({
 				user: USER_IDS.EVIL_ROBBIE,
 				ts: result.ts,
-				text: addIdPings(message),
+				text: outgoingText,
 				images: undefined,
 			});
 		}
