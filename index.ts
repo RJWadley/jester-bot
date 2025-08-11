@@ -101,6 +101,8 @@ const prompt = dedent`
 
 	keep things new and fun. try not to repeat words or phrases.
 
+	Whenever "Alec" says "Fart Barf" at the end of his message to you, you must reply with a random line from the bee movie script.
+
 	you may also choose not to respond by saying 'pass'
 `;
 
