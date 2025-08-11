@@ -1,51 +1,50 @@
-import { App } from "@slack/bolt";
-import { generateText, type CoreMessage } from "ai";
 import { google } from "@ai-sdk/google";
-import dedent from "dedent";
+import { App } from "@slack/bolt";
+import { type ModelMessage, generateText } from "ai";
 import { $, sleep } from "bun";
-import { openai } from "@ai-sdk/openai";
+import dedent from "dedent";
 import { viewWebsite } from "./websites";
 
 const DEFAULT_MESSAGE_COUNT = 10;
 
-const googleModel = google("gemini-2.0-flash-thinking-exp", {
-	safetySettings: [
-		{
-			category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-			threshold: "BLOCK_NONE",
-		},
-		{
-			category: "HARM_CATEGORY_HARASSMENT",
-			threshold: "BLOCK_NONE",
-		},
-		{
-			category: "HARM_CATEGORY_HATE_SPEECH",
-			threshold: "BLOCK_NONE",
-		},
-		{
-			category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-			threshold: "BLOCK_NONE",
-		},
-	],
-});
-
-const openaiModel = openai("gpt-4.5-preview");
+const googleModel = google("gemini-2.5-flash");
 
 const doubleGenerate = (
 	options: Omit<Parameters<typeof generateText>[0], "model">,
 ) => {
 	try {
-		return generateText({ ...options, model: openaiModel });
+		return generateText({
+			...options,
+			model: googleModel,
+			providerOptions: {
+				google: {
+					safetySettings: [
+						{
+							category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+							threshold: "BLOCK_NONE",
+						},
+						{
+							category: "HARM_CATEGORY_HARASSMENT",
+							threshold: "BLOCK_NONE",
+						},
+						{
+							category: "HARM_CATEGORY_HATE_SPEECH",
+							threshold: "BLOCK_NONE",
+						},
+						{
+							category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+							threshold: "BLOCK_NONE",
+						},
+					],
+				},
+			},
+		});
 	} catch (e) {
-		try {
-			return generateText({ ...options, model: googleModel });
-		} catch (e) {
-			console.error("failed to generate text", e);
-			return {
-				text: "your message was so dumb, i crashed twice while trying to respond",
-				reasoning: "",
-			};
-		}
+		console.error("failed to generate text", e);
+		return {
+			text: "your message was so dumb, i crashed while trying to respond",
+			reasoningText: "",
+		};
 	}
 };
 
@@ -304,7 +303,7 @@ app.event("message", async ({ event, context, client, say }) => {
 
 		console.log("generating a response...");
 
-		const messages: CoreMessage[] =
+		const messages: ModelMessage[] =
 			messageHistory[event.channel]
 				?.flatMap((message) => [
 					message.text
@@ -324,7 +323,7 @@ app.event("message", async ({ event, context, client, say }) => {
 										/\n```$/g,
 										"",
 									)}`,
-							} satisfies CoreMessage)
+							} satisfies ModelMessage)
 						: null,
 					message.images
 						? message.images
@@ -345,17 +344,16 @@ app.event("message", async ({ event, context, client, say }) => {
 													image: typeof i === "string" ? new URL(i) : i,
 												},
 											],
-										}) satisfies CoreMessage,
+										}) satisfies ModelMessage,
 								)
 						: null,
 				])
 				.flat()
 				.filter((x) => x !== null) ?? [];
 
-		const { text: modelOutput, reasoning } = await doubleGenerate({
+		const { text: modelOutput, reasoningText } = await doubleGenerate({
 			messages,
 			system: prompt,
-			maxSteps: 5,
 		});
 
 		const message = modelOutput
@@ -363,7 +361,7 @@ app.event("message", async ({ event, context, client, say }) => {
 			.replaceAll(/^\[.*?\]/g, "")
 			.trim();
 
-		console.log("LLM reasoning:", reasoning || "no reasoning");
+		console.log("LLM reasoning:", reasoningText || "no reasoning");
 		console.log("LLM response:", message || "no message");
 
 		const shouldMessage =

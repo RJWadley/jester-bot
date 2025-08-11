@@ -12,15 +12,15 @@
 		"typescript": "^5.5.4"
 	},
 	"dependencies": {
-		"@ai-sdk/google": "^1.1.20",
-		"@ai-sdk/openai": "^1.2.1",
-		"@slack/bolt": "^4.2.1",
-		"ai": "^4.1.53",
-		"dedent": "^1.5.3",
+		"@ai-sdk/google": "^2.0.4",
+		"@ai-sdk/openai": "^2.0.10",
+		"@slack/bolt": "^4.4.0",
+		"ai": "^5.0.10",
+		"dedent": "^1.6.0",
 		"puppeteer-extra": "^3.3.6",
 		"puppeteer-extra-plugin-adblocker": "^2.13.6",
 		"puppeteer-extra-plugin-stealth": "^2.11.2",
-		"zod": "^3.24.2"
+		"zod": "^4.0.17"
 	},
-	"packageManager": "bun@1.2.18"
+	"packageManager": "bun@1.2.20"
 }
