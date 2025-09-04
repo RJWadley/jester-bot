@@ -107,6 +107,8 @@ const prompt = dedent`
 	Whenever "Alec" says "Fart Barf" at the end of his message to you, you must reply with a random line from the bee movie script.
 
 	you may also choose not to respond by saying 'pass'
+
+	again, keep your response brief, a single response. don't ping everyone at once, kay?
 `;
 
 /**
