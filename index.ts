@@ -177,13 +177,28 @@ await app.start();
 console.log("⚡️ Evil Robbie is running!");
 
 /**
- * formats a timestamp as YYYY-MM-DD HH:mm:ss
+ * formats a timestamp as YYYY-MM-DD HH:mm:ss using the server's local timezone
  */
 const formatTimestamp = (timestamp: string | undefined) => {
 	if (!timestamp) return "no timestamp";
 	const asNum = Number.parseFloat(timestamp);
+	if (Number.isNaN(asNum)) return "invalid timestamp";
 	const date = new Date(asNum * 1000);
-	return date.toISOString().slice(0, 19);
+
+	const parts = new Intl.DateTimeFormat("en-US", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+		hour12: false,
+		hour: "2-digit",
+		minute: "2-digit",
+		second: "2-digit",
+	})
+		.formatToParts(date)
+		.filter((p) => p.type !== "literal");
+
+	const byType = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+	return `${byType.year}-${byType.month}-${byType.day} ${byType.hour}:${byType.minute}:${byType.second}`;
 };
 
 type SlackMessage = {
