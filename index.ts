@@ -77,9 +77,10 @@ const USER_IDS = {
 	David: "U01C6EY2MV1",
 	Dallen: "U01T3U9RQER",
 	Max: "U06TNMVL8QZ",
-	EVIL_ROBBIE: "U042LLR0XJS",
+	ROBBIE_SENIOR: "U042LLR0XJS",
 	Emily: "U08HB9DHHLZ",
 	Cody: "U0945M60KCN",
+	Gavin: "U098GKG1ZKJ",
 };
 
 const prompt = dedent`
@@ -158,7 +159,7 @@ const prepareOutgoingText = (text: string): string =>
 
 const getNameFromId = (id: string | undefined) => {
 	if (!id) return "unknown";
-	if (id === USER_IDS.EVIL_ROBBIE) return "YOU";
+	if (id === USER_IDS.ROBBIE_SENIOR) return "YOU";
 	return REVERSE_USER_IDS[id] ?? id;
 };
 
@@ -174,7 +175,7 @@ const app = new App({
 	socketMode: true,
 });
 await app.start();
-console.log("⚡️ Evil Robbie is running!");
+console.log("⚡️ Robbie Senior is running!");
 
 /**
  * formats a timestamp as YYYY-MM-DD HH:mm:ss using the server's local timezone
@@ -341,7 +342,7 @@ app.event("message", async ({ event, context, client, say }) => {
 		}
 
 		// SAFETY: bail out if we're replying to a bot
-		if ("user" in event && event.user === USER_IDS.EVIL_ROBBIE) return;
+		if ("user" in event && event.user === USER_IDS.ROBBIE_SENIOR) return;
 		if ("bot_id" in event && event.bot_id) return;
 
 		console.log("generating a response...");
@@ -352,7 +353,9 @@ app.event("message", async ({ event, context, client, say }) => {
 					message.text
 						? ({
 								role:
-									message.user === USER_IDS.EVIL_ROBBIE ? "assistant" : "user",
+									message.user === USER_IDS.ROBBIE_SENIOR
+										? "assistant"
+										: "user",
 								content: `[${getNameFromId(
 									message.user,
 								)} at ${formatTimestamp(message.ts)}] ${message.text
@@ -421,7 +424,7 @@ app.event("message", async ({ event, context, client, say }) => {
 			});
 			// add the message to the history
 			messageHistory[event.channel]?.push({
-				user: USER_IDS.EVIL_ROBBIE,
+				user: USER_IDS.ROBBIE_SENIOR,
 				ts: result.ts,
 				text: outgoingText,
 				images: undefined,
