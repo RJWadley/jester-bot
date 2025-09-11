@@ -17,7 +17,7 @@ const doubleGenerate = (
 	try {
 		return generateText({
 			...options,
-			model: openaiModel,
+			model: googleModel,
 			providerOptions: {
 				google: {
 					safetySettings: [
