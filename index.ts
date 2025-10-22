@@ -9,7 +9,7 @@ import { openai } from "@ai-sdk/openai";
 const DEFAULT_MESSAGE_COUNT = 10;
 
 const googleModel = google("gemini-2.5-flash");
-const openaiModel = openai("gpt-5-nano-2025-08-07");
+const openaiModel = openai("gpt-4o-2024-08-06");
 
 const doubleGenerate = (
 	options: Omit<Parameters<typeof generateText>[0], "model">,
